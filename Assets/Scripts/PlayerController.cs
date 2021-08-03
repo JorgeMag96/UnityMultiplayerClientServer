@@ -5,23 +5,35 @@ using UnityEngine;
 
 public class PlayerController : NetworkBehaviour {
 
-    public override void OnStartLocalPlayer()
-    {
-        Camera.main.GetComponent<CameraFollow>().target=transform; //Fix camera on "me" 
+    public float moveSpeed = 10f;
+    public Rigidbody rb;
+
+    private float _xInput;
+    private float _zInput;
+
+    public override void OnStartLocalPlayer() {
+        Camera.main.GetComponent<CameraFollow>().playerTransform = transform; //Fix camera on "me" 
+        rb = GetComponent<Rigidbody>();
     }
 
-    void HandleMovement()
-    {
-        float moveHorizontal = Input.GetAxis("Horizontal");
-        float moveVertical = Input.GetAxis("Vertical");
-        Vector3 movement = new Vector3(moveHorizontal * 0.1f, 0,  moveVertical * 0.1f);
-        transform.position += movement;
+    private void HandleMovement() {
+        rb.AddForce(new Vector3(_xInput, 0f, _zInput) * moveSpeed);
+    }
+    
+    private void Update() {
+        if (!isLocalPlayer) return;
+
+        ProcessInputs();
     }
 
-    void Update()
-    {
+    private void FixedUpdate() {
         if (!isLocalPlayer) return;
 
         HandleMovement();
+    }
+
+    private void ProcessInputs() {
+        _xInput = Input.GetAxisRaw("Horizontal");
+        _zInput = Input.GetAxisRaw("Vertical");
     }
 }
